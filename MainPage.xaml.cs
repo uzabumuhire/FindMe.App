@@ -13,10 +13,30 @@ public partial class MainPage : ContentPage
 		InitializeComponent();
 	}
 
-	private void OnFindMeClicked(object sender, EventArgs e)
-	{
-		
-	}
+    private async void OnFindMeClicked(object sender, EventArgs e)
+    {
+        var permissions = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
+
+        if (permissions == PermissionStatus.Granted)
+        {
+            await ShareLocation();
+        }
+        else
+        {
+            await App.Current.MainPage.DisplayAlert("Permissions Error", "You have not granted the app permission to access your location.", "OK");
+
+            var requested = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+
+            if (requested == PermissionStatus.Granted)
+            {
+                await ShareLocation();
+            }
+            else
+            {
+                await App.Current.MainPage.DisplayAlert("Location Required", "Location is required to share it. We'll ask again next time.", "OK");
+            }
+        }
+    }
 
     // Gets the user’s name and shares their location.
     private async Task ShareLocation()
